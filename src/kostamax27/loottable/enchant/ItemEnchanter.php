@@ -18,12 +18,22 @@ interface ItemEnchanter{
 	public function prepare(Item $item) : Item;
 
 	/**
-	 * Returns every enchantment that may be applied to the result of
-	 * {@see self::prepare()}, primary or secondary.
+	 * Every enchantment that may sit on the result of {@see self::prepare()},
+	 * as enchant_randomly picks from.
 	 *
+	 * @param bool $treasure whether loot-only enchantments (mending, curses, ...) are included
 	 * @return list<Enchantment>
 	 */
-	public function availableEnchantments(Item $item) : array;
+	public function availableEnchantments(Item $item, bool $treasure) : array;
+
+	/**
+	 * What an enchanting table would offer the result of {@see self::prepare()},
+	 * as enchant_with_levels picks from.
+	 *
+	 * @param bool $treasure whether loot-only enchantments are added to the table's pool
+	 * @return list<Enchantment>
+	 */
+	public function tableEnchantments(Item $item, bool $treasure) : array;
 
 	/**
 	 * @return Item result of {@see self::prepare()} carrying $enchantments

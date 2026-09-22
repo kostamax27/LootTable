@@ -18,7 +18,7 @@ final class EnchantRandomlyLootFunction implements LootFunction{
 	){}
 
 	public function apply(Item $item, LootContext $context) : Item{
-		$candidates = $this->enchanter->availableEnchantments($item);
+		$candidates = $this->enchanter->availableEnchantments($item, $this->treasure);
 		if(count($candidates) === 0){
 			return $item;
 		}
