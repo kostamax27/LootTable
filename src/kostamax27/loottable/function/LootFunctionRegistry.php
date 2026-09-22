@@ -15,6 +15,7 @@ use pocketmine\block\utils\DyeColor;
 use pocketmine\crafting\FurnaceRecipeManager;
 use pocketmine\crafting\FurnaceType;
 use pocketmine\data\bedrock\DyeColorIdMap;
+use pocketmine\data\bedrock\SuspiciousStewTypeIdMap;
 use pocketmine\item\enchantment\StringToEnchantmentParser;
 use pocketmine\item\PotionType;
 use pocketmine\Server;
@@ -32,8 +33,7 @@ final class LootFunctionRegistry{
 
 	// vanilla functions with no pocketmine equivalent, registered as no-ops so vanilla tables load
 	public const UNSUPPORTED_VANILLA = ["set_data_from_color_index", "random_block_state", "set_actor_id", "set_ominous_bottle_amplifier",
-		"set_stew_effect", "set_armor_trim", "exploration_map", "fill_container", "trader_material_type", "enchant_random_gear",
-		"explosion_decay", "set_spawn_egg"];
+		"set_armor_trim", "exploration_map", "fill_container", "trader_material_type", "explosion_decay", "set_spawn_egg"];
 
 	public static function createDefault(?FurnaceRecipeManager $furnace_recipe_manager = null) : self{
 		$registry = new self();
@@ -54,6 +54,15 @@ final class LootFunctionRegistry{
 			$factory->item_resolver,
 			$data->intRangeOr("values", IntRange::exact(0))
 		));
+		$registry->register("set_stew_effect", static function(LootData $data, LootTableFactory $factory) : LootFunction{
+			$map = SuspiciousStewTypeIdMap::getInstance();
+			$types = [];
+			foreach($data->objects("effects") as $effect){
+				$id = $effect->int("id");
+				$types[] = $map->fromId($id) ?? throw new InvalidArgumentException("'{$effect->at("id")}' names an unknown stew effect {$id}");
+			}
+			return new SetStewEffectLootFunction($types);
+		});
 		$registry->register("set_name", static fn(LootData $data, LootTableFactory $factory) : LootFunction => new SetNameLootFunction($data->string("name")));
 		$registry->register("set_lore", static fn(LootData $data, LootTableFactory $factory) : LootFunction => new SetLoreLootFunction($data->strings("lore")));
 		$registry->register("set_damage", static fn(LootData $data, LootTableFactory $factory) : LootFunction => new SetDamageLootFunction($data->floatRange("damage")));
@@ -66,6 +75,10 @@ final class LootFunctionRegistry{
 			$factory->item_enchanter,
 			$data->intRange("levels"),
 			$data->boolOr("treasure", false)
+		));
+		$registry->register("enchant_random_gear", static fn(LootData $data, LootTableFactory $factory) : LootFunction => new EnchantRandomGearLootFunction(
+			new EnchantWithLevelsLootFunction($factory->item_enchanter, new IntRange(5, 22)),
+			$data->floatOr("chance", 1.0)
 		));
 		$registry->register("specific_enchants", static function(LootData $data, LootTableFactory $factory) : LootFunction{
 			$parser = StringToEnchantmentParser::getInstance();
