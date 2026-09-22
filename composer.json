@@ -1,0 +1,20 @@
+{
+    "name": "kostamax27/loottable",
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "php": "^8.1",
+        "pocketmine/pocketmine-mp": "^5.5.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "kostamax27\\loottable\\": "src/kostamax27/loottable"
+        }
+    },
+    "extra": {
+        "virion": {
+            "spec": "3.0",
+            "namespace-root": "kostamax27\\loottable"
+        }
+    }
+}
