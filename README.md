@@ -52,7 +52,7 @@ Where the server cannot answer a question on its own, the factory takes a strate
 3. [`StringToItemParserItemResolver`](src/kostamax27/loottable/item/StringToItemParserItemResolver.php): aliases, including any a plugin registered under its own namespace.
 4. [`LegacyStringToItemParserItemResolver`](src/kostamax27/loottable/item/LegacyStringToItemParserItemResolver.php): `wool:14`, `35:14`.
 
-A name without a namespace is treated as vanilla, so `wool`, `minecraft:wool` and `muttonRaw` all resolve. Because the resolver understands data values, `set_data` and `random_aux_value` are real functions: the item is re-resolved under its own Bedrock id with the rolled value.
+A name without a namespace is treated as vanilla, so `wool`, `minecraft:wool` and `muttonRaw` all resolve. Because the resolver understands data values, `set_data` and `random_aux_value` are real functions: the name written in the loot table is re-resolved with the rolled value, so variants such as `skull` + 1 (wither skeleton skull) survive.
 
 ### Looting
 Pocketmine ships no looting enchantment, so `looting_enchant` and `random_chance_with_looting` ask a `LootingEvaluator` instead of reading a level off the tool. [`EnchantmentLootingEvaluator::fromName("looting")`](src/kostamax27/loottable/looting/EnchantmentLootingEvaluator.php) picks up whatever enchantment a plugin registered under that name; [`ClosureLootingEvaluator`](src/kostamax27/loottable/looting/ClosureLootingEvaluator.php) takes anything else (a permission, a stat, a lore tag); [`StaticLootingEvaluator`](src/kostamax27/loottable/looting/StaticLootingEvaluator.php) fixes a level for tests. The evaluator is handed to functions at parse time, so it goes into the factory before any table is parsed.

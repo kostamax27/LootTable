@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace kostamax27\loottable\item;
 
 use pocketmine\data\bedrock\item\ItemTypeDeserializeException;
+use pocketmine\data\bedrock\item\SavedItemData;
+use pocketmine\data\bedrock\item\SavedItemStackData;
 use pocketmine\data\SavedDataLoadingException;
 use pocketmine\item\Item;
+use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\world\format\io\GlobalItemDataHandlers;
 
 final class SavedItemDataItemResolver implements ItemResolver{
@@ -22,8 +25,13 @@ final class SavedItemDataItemResolver implements ItemResolver{
 
 	public function resolve(string $name, int $meta = 0) : ?Item{
 		try{
-			$data = GlobalItemDataHandlers::getUpgrader()->upgradeItemTypeDataString(ItemNames::withVanillaNamespace($name), $meta, 1, null);
-			return GlobalItemDataHandlers::getDeserializer()->deserializeType($data->getTypeData());
+			// loads it like a saved item, which is what gives block items the state of their data
+			$data = GlobalItemDataHandlers::getUpgrader()->upgradeItemStackNbt(CompoundTag::create()
+				->setString(SavedItemData::TAG_NAME, ItemNames::withVanillaNamespace($name))
+				->setShort(SavedItemData::TAG_DAMAGE, $meta)
+				->setByte(SavedItemStackData::TAG_COUNT, 1)
+			);
+			return $data === null ? null : GlobalItemDataHandlers::getDeserializer()->deserializeType($data->getTypeData());
 		}catch(SavedDataLoadingException | ItemTypeDeserializeException){
 			return null;
 		}

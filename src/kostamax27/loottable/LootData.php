@@ -36,7 +36,8 @@ final class LootData{
 	 */
 	public function __construct(
 		readonly private array $data,
-		readonly public string $path
+		readonly public string $path,
+		readonly public ?self $parent = null
 	){}
 
 	public function has(string $key) : bool{
@@ -141,7 +142,7 @@ final class LootData{
 	public function object(string $key) : self{
 		$value = $this->raw($key);
 		is_array($value) || throw new InvalidArgumentException("'{$this->at($key)}' must be an object, got " . get_debug_type($value));
-		return new self($value, $this->at($key));
+		return new self($value, $this->at($key), $this);
 	}
 
 	/**
@@ -156,7 +157,7 @@ final class LootData{
 		$result = [];
 		foreach($value as $index => $entry){
 			is_array($entry) || throw new InvalidArgumentException("'{$this->at($key)}[{$index}]' must be an object, got " . get_debug_type($entry));
-			$result[] = new self($entry, "{$this->at($key)}[{$index}]");
+			$result[] = new self($entry, "{$this->at($key)}[{$index}]", $this);
 		}
 		return $result;
 	}
