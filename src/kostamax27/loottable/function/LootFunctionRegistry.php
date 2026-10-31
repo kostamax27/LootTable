@@ -6,6 +6,7 @@ namespace kostamax27\loottable\function;
 
 use Closure;
 use InvalidArgumentException;
+use kostamax27\loottable\entry\LootEntryType;
 use kostamax27\loottable\IntRange;
 use kostamax27\loottable\LootData;
 use kostamax27\loottable\LootTableFactory;
@@ -48,11 +49,13 @@ final class LootFunctionRegistry{
 		));
 		$registry->register("set_data", static fn(LootData $data, LootTableFactory $factory) : LootFunction => new SetDataLootFunction(
 			$factory->item_resolver,
-			$data->intRangeOr("data", IntRange::exact(0))
+			$data->intRangeOr("data", IntRange::exact(0)),
+			self::entryItemName($data)
 		));
 		$registry->register("random_aux_value", static fn(LootData $data, LootTableFactory $factory) : LootFunction => new SetDataLootFunction(
 			$factory->item_resolver,
-			$data->intRangeOr("values", IntRange::exact(0))
+			$data->intRangeOr("values", IntRange::exact(0)),
+			self::entryItemName($data)
 		));
 		$registry->register("set_stew_effect", static function(LootData $data, LootTableFactory $factory) : LootFunction{
 			$map = SuspiciousStewTypeIdMap::getInstance();
@@ -152,6 +155,17 @@ final class LootFunctionRegistry{
 	 */
 	public function get(string $identifier) : Closure{
 		return $this->registered[self::normalize($identifier)] ?? throw new InvalidArgumentException("Function with the identifier \"{$identifier}\" is not registered");
+	}
+
+	/**
+	 * @return string|null the item name the function's entry is written with, null if the entry has no item
+	 */
+	private static function entryItemName(LootData $function) : ?string{
+		$entry = $function->parent;
+		if($entry === null || $entry->stringOr("type", LootEntryType::ITEM->value) !== LootEntryType::ITEM->value){
+			return null;
+		}
+		return $entry->stringNullable("name");
 	}
 
 	public static function normalize(string $identifier) : string{
