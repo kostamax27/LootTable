@@ -16,7 +16,7 @@ use function substr;
 final class LootConditionRegistry{
 
 	// vanilla conditions pocketmine cannot answer, registered as always-false so vanilla tables load
-	public const UNSUPPORTED_VANILLA = ["passenger_of_entity", "bool_property", "biome_has_tag", "random_regional_difficulty_chance"];
+	public const UNSUPPORTED_VANILLA = ["passenger_of_entity", "bool_property", "biome_has_tag"];
 
 	public static function createDefault() : self{
 		$registry = new self();
@@ -34,6 +34,10 @@ final class LootConditionRegistry{
 			$data->floatNullable("easy"),
 			$data->floatNullable("normal"),
 			$data->floatNullable("hard")
+		));
+		$registry->register("random_regional_difficulty_chance", static fn(LootData $data, LootTableFactory $factory) : LootCondition => new RandomRegionalDifficultyChanceLootCondition(
+			$factory->regional_difficulty_evaluator,
+			$data->float("max_chance")
 		));
 		$registry->register("entity_properties", static function(LootData $data, LootTableFactory $factory) : LootCondition{
 			$target = $data->stringOr("entity", EntityTarget::THIS->value);

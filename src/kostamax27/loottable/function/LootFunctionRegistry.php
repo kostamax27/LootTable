@@ -77,7 +77,8 @@ final class LootFunctionRegistry{
 			$data->boolOr("treasure", false)
 		));
 		$registry->register("enchant_random_gear", static fn(LootData $data, LootTableFactory $factory) : LootFunction => new EnchantRandomGearLootFunction(
-			new EnchantWithLevelsLootFunction($factory->item_enchanter, new IntRange(5, 22)),
+			$factory->item_enchanter,
+			$factory->regional_difficulty_evaluator,
 			$data->floatOr("chance", 1.0)
 		));
 		$registry->register("specific_enchants", static function(LootData $data, LootTableFactory $factory) : LootFunction{
