@@ -7,6 +7,8 @@ namespace kostamax27\loottable\function;
 use kostamax27\loottable\entity\EntityInspector;
 use kostamax27\loottable\LootContext;
 use pocketmine\block\utils\Colored;
+use pocketmine\item\Banner;
+use pocketmine\item\Dye;
 use pocketmine\item\Item;
 use pocketmine\item\ItemBlock;
 
@@ -18,10 +20,18 @@ final class SetDataFromColorIndexLootFunction implements LootFunction{
 
 	public function apply(Item $item, LootContext $context) : Item{
 		$color = $context->entity !== null ? $this->inspector->color($context->entity) : null;
-		$block = $item instanceof ItemBlock ? $item->getBlock() : null;
-		if($color === null || !$block instanceof Colored){
+		if($color === null){
 			return $item;
 		}
-		return $block->setColor($color)->asItem()->setNamedTag($item->getNamedTag())->setCount($item->getCount());
+		if($item instanceof Dye || $item instanceof Banner){
+			return $item->setColor($color);
+		}
+		$block = $item instanceof ItemBlock ? $item->getBlock() : null;
+		if(!$block instanceof Colored){
+			return $item;
+		}
+		return $block->setColor($color)->asItem()
+			->setNamedTag($item->getNamedTag())
+			->setCount($item->getCount());
 	}
 }
