@@ -42,6 +42,7 @@ Where the server cannot answer a question on its own, the factory takes a strate
 | what is the looting level?                        | [`LootingEvaluator`](src/kostamax27/loottable/looting/LootingEvaluator.php) | [`NullLootingEvaluator`](src/kostamax27/loottable/looting/NullLootingEvaluator.php), always 0                     |
 | how does this item take enchantments?             | [`ItemEnchanter`](src/kostamax27/loottable/enchant/ItemEnchanter.php)       | [`VanillaItemEnchanter`](src/kostamax27/loottable/enchant/VanillaItemEnchanter.php), books become enchanted books |
 | what type, variant and age is this entity?        | [`EntityInspector`](src/kostamax27/loottable/entity/EntityInspector.php)    | [`DefaultEntityInspector`](src/kostamax27/loottable/entity/DefaultEntityInspector.php)                            |
+| what is the regional difficulty?                  | [`RegionalDifficultyEvaluator`](src/kostamax27/loottable/difficulty/RegionalDifficultyEvaluator.php) | [`VanillaRegionalDifficultyEvaluator`](src/kostamax27/loottable/difficulty/VanillaRegionalDifficultyEvaluator.php) |
 | where is the table named by a `loot_table` entry? | [`LootTableResolver`](src/kostamax27/loottable/LootTableResolver.php)       | [`DirectoryLootTableResolver`](src/kostamax27/loottable/DirectoryLootTableResolver.php) when a directory is given |
 
 ### Item names
@@ -63,8 +64,11 @@ Pocketmine ships no looting enchantment, so `looting_enchant` and `random_chance
 ### Entities
 `killed_by_entity`, `entity_killed`, `damaged_by_entity`, `has_variant`, `has_mark_variant`, `is_baby` and `set_data_from_color_index` read through an `EntityInspector`. The default reports the save id from `EntityFactory` when the class is registered and `getNetworkTypeId()` otherwise (custom mobs commonly borrow a vanilla network id, but save under their own), reads variants from the synced network metadata, answers `is_baby` with `Ageable`, and takes the color from `Colored`. `damaged_by_entity` looks at the projectile when the last damage came through one.
 
+### Regional difficulty
+`random_regional_difficulty_chance` and `enchant_random_gear` ask a `RegionalDifficultyEvaluator`. The default reproduces Bedrock's value, which only depends on the difficulty of the context and the moon of the entity's world: 0 on peaceful and easy, 1 on hard, 0.375-0.625 on normal. [`StaticRegionalDifficultyEvaluator`](src/kostamax27/loottable/difficulty/StaticRegionalDifficultyEvaluator.php) fixes a value for tests.
+
 ### When a vanilla file asks for something pocketmine does not have
-Functions with no server-side equivalent (`exploration_map`, `set_armor_trim`, ... see [`LootFunctionRegistry::UNSUPPORTED_VANILLA`](src/kostamax27/loottable/function/LootFunctionRegistry.php)) are registered as no-ops, and conditions the server cannot answer (`passenger_of_entity`, `bool_property`, `biome_has_tag`, `random_regional_difficulty_chance`, see [`LootConditionRegistry::UNSUPPORTED_VANILLA`](src/kostamax27/loottable/condition/LootConditionRegistry.php)) as always-false, so every file in the vanilla pack loads and the affected pools do the least surprising thing. Anything not in either list throws at parse time. Both are ordinary registrations and can be replaced.
+Functions with no server-side equivalent (`exploration_map`, `set_armor_trim`, ... see [`LootFunctionRegistry::UNSUPPORTED_VANILLA`](src/kostamax27/loottable/function/LootFunctionRegistry.php)) are registered as no-ops, and conditions the server cannot answer (`passenger_of_entity`, `bool_property`, `biome_has_tag`, see [`LootConditionRegistry::UNSUPPORTED_VANILLA`](src/kostamax27/loottable/condition/LootConditionRegistry.php)) as always-false, so every file in the vanilla pack loads and the affected pools do the least surprising thing. Anything not in either list throws at parse time. Both are ordinary registrations and can be replaced.
 
 ## Examples
 

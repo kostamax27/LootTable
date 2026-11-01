@@ -5,19 +5,34 @@ declare(strict_types=1);
 namespace kostamax27\loottable\function;
 
 use InvalidArgumentException;
+use kostamax27\loottable\difficulty\RegionalDifficultyEvaluator;
+use kostamax27\loottable\enchant\ItemEnchanter;
+use kostamax27\loottable\enchant\LevelEnchanter;
 use kostamax27\loottable\LootContext;
 use pocketmine\item\Item;
 
 final class EnchantRandomGearLootFunction implements LootFunction{
 
+	private const BASE_LEVELS = 5;
+	private const RANDOM_LEVELS = 18;
+
+	private LevelEnchanter $level_enchanter;
+
 	public function __construct(
-		readonly public EnchantWithLevelsLootFunction $enchant,
+		ItemEnchanter $enchanter,
+		readonly public RegionalDifficultyEvaluator $evaluator,
 		readonly public float $chance
 	){
 		$this->chance >= 0.0 && $this->chance <= 1.0 || throw new InvalidArgumentException("'chance' must be within [0, 1], got {$this->chance}");
+		$this->level_enchanter = new LevelEnchanter($enchanter);
 	}
 
 	public function apply(Item $item, LootContext $context) : Item{
-		return $context->random->nextFloat() < $this->chance ? $this->enchant->apply($item, $context) : $item;
+		$difficulty = $this->evaluator->evaluate($context);
+		$random = $context->random;
+		if($difficulty * $this->chance <= $random->nextFloat()){
+			return $item;
+		}
+		return $this->level_enchanter->enchant($item, (int) ($difficulty * $random->nextBoundedInt(self::RANDOM_LEVELS) + self::BASE_LEVELS), $random);
 	}
 }
