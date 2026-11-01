@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace kostamax27\loottable\entity;
 
+use pocketmine\block\utils\DyeColor;
 use pocketmine\entity\Entity;
 
 interface EntityInspector{
@@ -25,6 +26,11 @@ interface EntityInspector{
 	 * @return int|null bedrock "mark_variant" value, or null when the entity has none
 	 */
 	public function markVariant(Entity $entity) : ?int;
+
+	/**
+	 * @return DyeColor|null color of the entity, or null when it has none
+	 */
+	public function color(Entity $entity) : ?DyeColor;
 
 	public function isBaby(Entity $entity) : bool;
 }

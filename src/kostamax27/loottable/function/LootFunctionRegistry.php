@@ -33,7 +33,7 @@ use function substr;
 final class LootFunctionRegistry{
 
 	// vanilla functions with no pocketmine equivalent, registered as no-ops so vanilla tables load
-	public const UNSUPPORTED_VANILLA = ["set_data_from_color_index", "random_block_state", "set_actor_id", "set_ominous_bottle_amplifier",
+	public const UNSUPPORTED_VANILLA = ["random_block_state", "set_actor_id", "set_ominous_bottle_amplifier",
 		"set_armor_trim", "exploration_map", "fill_container", "trader_material_type", "explosion_decay", "set_spawn_egg"];
 
 	public static function createDefault(?FurnaceRecipeManager $furnace_recipe_manager = null) : self{
@@ -57,6 +57,7 @@ final class LootFunctionRegistry{
 			$data->intRangeOr("values", IntRange::exact(0)),
 			self::entryItemName($data)
 		));
+		$registry->register("set_data_from_color_index", static fn(LootData $data, LootTableFactory $factory) : LootFunction => new SetDataFromColorIndexLootFunction($factory->entity_inspector));
 		$registry->register("set_stew_effect", static function(LootData $data, LootTableFactory $factory) : LootFunction{
 			$map = SuspiciousStewTypeIdMap::getInstance();
 			$types = [];

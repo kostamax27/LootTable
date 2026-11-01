@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace kostamax27\loottable\entity;
 
+use pocketmine\block\utils\Colored;
+use pocketmine\block\utils\DyeColor;
 use pocketmine\entity\Ageable;
 use pocketmine\entity\Entity;
 use pocketmine\entity\EntityFactory;
@@ -26,6 +28,10 @@ final class DefaultEntityInspector implements EntityInspector{
 
 	public function markVariant(Entity $entity) : ?int{
 		return self::intProperty($entity, EntityMetadataProperties::MARK_VARIANT);
+	}
+
+	public function color(Entity $entity) : ?DyeColor{
+		return $entity instanceof Colored ? $entity->getColor() : null;
 	}
 
 	public function isBaby(Entity $entity) : bool{
