@@ -9,6 +9,7 @@ use JsonException;
 use function array_is_list;
 use function array_key_exists;
 use function count;
+use function floor;
 use function get_debug_type;
 use function is_array;
 use function is_bool;
@@ -18,6 +19,8 @@ use function is_string;
 use function json_decode;
 use function var_export;
 use const JSON_THROW_ON_ERROR;
+use const PHP_INT_MAX;
+use const PHP_INT_MIN;
 
 final class LootData{
 
@@ -55,8 +58,7 @@ final class LootData{
 
 	public function int(string $key) : int{
 		$value = $this->raw($key);
-		is_int($value) || throw new InvalidArgumentException("'{$this->at($key)}' must be an integer, got " . get_debug_type($value));
-		return $value;
+		return self::asInt($value) ?? throw new InvalidArgumentException("'{$this->at($key)}' must be an integer, got " . get_debug_type($value));
 	}
 
 	public function intOr(string $key, int $default) : int{
@@ -117,9 +119,10 @@ final class LootData{
 	 */
 	public function intRange(string $key) : IntRange{
 		[$min, $max] = $this->range($key);
-		is_int($min) || throw new InvalidArgumentException("'{$this->at($key)}' minimum must be an integer, got " . get_debug_type($min));
-		is_int($max) || throw new InvalidArgumentException("'{$this->at($key)}' maximum must be an integer, got " . get_debug_type($max));
-		return new IntRange($min, $max);
+		return new IntRange(
+			self::asInt($min) ?? throw new InvalidArgumentException("'{$this->at($key)}' minimum must be an integer, got " . get_debug_type($min)),
+			self::asInt($max) ?? throw new InvalidArgumentException("'{$this->at($key)}' maximum must be an integer, got " . get_debug_type($max))
+		);
 	}
 
 	public function intRangeOr(string $key, IntRange $default) : IntRange{
@@ -195,6 +198,21 @@ final class LootData{
 			is_string($entry) || throw new InvalidArgumentException("'{$this->at($key)}[{$index}]' must be a string, got " . get_debug_type($entry));
 		}
 		return $value;
+	}
+
+	/**
+	 * Reads an int, or a float without a fractional part, as vanilla files write counts (10.0).
+	 */
+	private static function asInt(mixed $value) : ?int{
+		if(is_int($value)){
+			return $value;
+		}
+
+		return (is_float($value) &&
+			$value === floor($value) &&
+			$value >= PHP_INT_MIN &&
+			$value < PHP_INT_MAX
+		) ? (int) $value : null;
 	}
 
 	/**
