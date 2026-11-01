@@ -16,6 +16,7 @@ use kostamax27\loottable\entry\ItemLootEntry;
 use kostamax27\loottable\entry\LootEntry;
 use kostamax27\loottable\entry\LootEntryType;
 use kostamax27\loottable\entry\LootTableLootEntry;
+use kostamax27\loottable\entry\NestedPoolsLootEntry;
 use kostamax27\loottable\entry\WeightedLootEntry;
 use kostamax27\loottable\function\ConditionalLootFunction;
 use kostamax27\loottable\function\LootFunction;
@@ -133,7 +134,7 @@ final class LootTableFactory{
 
 	public function parseEntry(LootData $data) : LootEntry{
 		$type = $data->stringOr("type", LootEntryType::ITEM->value);
-		return match(LootEntryType::tryFrom($type) ?? throw new InvalidArgumentException("'{$data->at("type")}' must be one of 'item', 'loot_table', 'empty', got '{$type}'")){
+		$entry = match(LootEntryType::tryFrom($type) ?? throw new InvalidArgumentException("'{$data->at("type")}' must be one of 'item', 'loot_table', 'empty', got '{$type}'")){
 			LootEntryType::ITEM => new ItemLootEntry(
 				$this->item_resolver->resolve($name = $data->string("name")) ?? throw new InvalidArgumentException("'{$data->at("name")}' names an unknown item '{$name}'"),
 				$this->parseFunctions($data->objects("functions"))
@@ -141,6 +142,8 @@ final class LootTableFactory{
 			LootEntryType::LOOT_TABLE => new LootTableLootEntry($data->string("name"), $this->table_resolver, $this->parseFunctions($data->objects("functions"))),
 			LootEntryType::EMPTY => EmptyLootEntry::instance()
 		};
+		$pools = $data->objects("pools");
+		return count($pools) === 0 ? $entry : new NestedPoolsLootEntry($entry, array_map($this->parsePool(...), $pools));
 	}
 
 	/**
