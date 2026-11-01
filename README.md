@@ -54,6 +54,12 @@ Where the server cannot answer a question on its own, the factory takes a strate
 
 A name without a namespace is treated as vanilla, so `wool`, `minecraft:wool` and `muttonRaw` all resolve. Because the resolver understands data values, `set_data` and `random_aux_value` are real functions: the name written in the loot table is re-resolved with the rolled value, so variants such as `skull` + 1 (wither skeleton skull) survive.
 
+A name no resolver knows makes the table fail to parse. [`AirFallbackItemResolver`](src/kostamax27/loottable/item/AirFallbackItemResolver.php) wraps a resolver so such an entry drops nothing instead, which lets a table written for items the server lacks load; the optional closure is told which ones:
+
+```php
+$items = new AirFallbackItemResolver(ChainedItemResolver::createDefault(), static fn(string $name) => $logger->warning("Unknown item $name"));
+```
+
 ### Looting
 Pocketmine ships no looting enchantment, so `looting_enchant` and `random_chance_with_looting` ask a `LootingEvaluator` instead of reading a level off the tool. [`EnchantmentLootingEvaluator::fromName("looting")`](src/kostamax27/loottable/looting/EnchantmentLootingEvaluator.php) picks up whatever enchantment a plugin registered under that name; [`ClosureLootingEvaluator`](src/kostamax27/loottable/looting/ClosureLootingEvaluator.php) takes anything else (a permission, a stat, a lore tag); [`StaticLootingEvaluator`](src/kostamax27/loottable/looting/StaticLootingEvaluator.php) fixes a level for tests. The evaluator is handed to functions at parse time, so it goes into the factory before any table is parsed.
 
