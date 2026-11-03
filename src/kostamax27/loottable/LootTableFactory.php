@@ -7,6 +7,8 @@ namespace kostamax27\loottable;
 use InvalidArgumentException;
 use kostamax27\loottable\condition\LootCondition;
 use kostamax27\loottable\condition\LootConditionRegistry;
+use kostamax27\loottable\difficulty\RegionalDifficultyEvaluator;
+use kostamax27\loottable\difficulty\VanillaRegionalDifficultyEvaluator;
 use kostamax27\loottable\enchant\ItemEnchanter;
 use kostamax27\loottable\enchant\VanillaItemEnchanter;
 use kostamax27\loottable\entity\EntityInspector;
@@ -58,6 +60,7 @@ final class LootTableFactory{
 	 * @param LootingEvaluator $looting_evaluator source of looting levels for looting_enchant and random_chance_with_looting
 	 * @param ItemEnchanter $item_enchanter applies enchantments for enchant_randomly, enchant_with_levels and specific_enchants
 	 * @param EntityInspector $entity_inspector answers entity type, variant and age conditions
+	 * @param RegionalDifficultyEvaluator $regional_difficulty_evaluator source of the regional difficulty for random_regional_difficulty_chance and enchant_random_gear
 	 */
 	public function __construct(
 		readonly public LootFunctionRegistry $function_registry,
@@ -65,7 +68,8 @@ final class LootTableFactory{
 		readonly public ItemResolver $item_resolver,
 		readonly public LootingEvaluator $looting_evaluator,
 		readonly public ItemEnchanter $item_enchanter = new VanillaItemEnchanter(),
-		readonly public EntityInspector $entity_inspector = new DefaultEntityInspector()
+		readonly public EntityInspector $entity_inspector = new DefaultEntityInspector(),
+		readonly public RegionalDifficultyEvaluator $regional_difficulty_evaluator = new VanillaRegionalDifficultyEvaluator()
 	){
 		$this->table_resolver = NullLootTableResolver::instance();
 	}
