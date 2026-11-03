@@ -21,7 +21,12 @@ final class LootTableLootEntry implements LootEntry{
 	){}
 
 	public function generate(LootContext $context) : array{
-		$items = $this->resolver->resolve($this->name)->generate($context);
+		$context->tables->enter($this->name);
+		try{
+			$items = $this->resolver->resolve($this->name)->generate($context);
+		}finally{
+			$context->tables->leave($this->name);
+		}
 		if(count($this->functions) === 0){
 			return $items;
 		}

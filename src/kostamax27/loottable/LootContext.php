@@ -20,6 +20,7 @@ final class LootContext{
 	 * @param Item|null $tool item used to kill $entity or break the block, or null when there is none
 	 * @param float $luck scales bonus rolls and entry quality
 	 * @param LootDifficulty $difficulty difficulty of the world the drop occurs in
+	 * @param LootTableStack $tables loot tables being rolled, a fresh one is enough for a new roll
 	 */
 	public function __construct(
 		readonly public Random $random,
@@ -27,6 +28,7 @@ final class LootContext{
 		readonly public ?Entity $killer = null,
 		readonly public ?Item $tool = null,
 		readonly public float $luck = 0.0,
-		readonly public LootDifficulty $difficulty = LootDifficulty::NORMAL
+		readonly public LootDifficulty $difficulty = LootDifficulty::NORMAL,
+		readonly public LootTableStack $tables = new LootTableStack()
 	){}
 }
